@@ -1,0 +1,5 @@
+# No node modules
+node_modules/
+
+# No env vars
+.env
