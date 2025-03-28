@@ -1,0 +1,21 @@
+services:
+  mysql:
+    image: mysql
+    container_name: <name_of_container>
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: <password_here>
+      MYSQL_DATABASE: <db_name_here>
+      MYSQL_USER: <db_user_name_here>
+      MYSQL_PASSWORD: <db_user_password_here>
+    volumes:
+      - mysql_volume:/var/lib/mysql
+    networks:
+      - mysql_network
+
+volumes:
+  mysql_volume:
+
+networks:
+  mysql_network:
