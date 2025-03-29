@@ -6,7 +6,7 @@ import {
     addBook,
     updateBook,
     deleteBook,
-    restoreArchivedBookById
+    restoreArchivedBookById,
 } from '../controllers/book.js';
 
 
