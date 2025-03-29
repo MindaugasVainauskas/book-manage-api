@@ -1,15 +1,28 @@
+import { Op } from "sequelize";
 import Book from "../models/book.js";
 
 // Get all books in DB with optional limit option
 const getBooks = async (req, res, next) => {
     console.log("Get all books");
-    const limit = parseInt(req.query.limit);
+    console.log("REQ_QUERY: ", req.query);
+    const {filter} = req.query;
+    let dbQuery = {};
 
-    const books = await Book.findAll();
-
-    if (!isNaN(limit) && limit > 0) {
-        return res.status(200).json(books.slice(0, limit));        
+    // Change filtered query according to book active state if user wants so.
+    // Default is active books only.
+    switch (filter) {
+        case 'archived':
+            dbQuery = {where: {deletedAt: {[Op.not]: null}}, paranoid: false};
+            break;
+        case 'all':
+            dbQuery = {paranoid: false};
+            break;
+        default:
+            break;
     };
+        
+    console.log("QUERY_USED: ", dbQuery);
+    const books = await Book.findAll(dbQuery);
 
     res.status(200).json(books);
     next();
@@ -78,8 +91,18 @@ const deleteBook = async (req, res) => {
     res.status(200).json(books);
 };
 
-// TODO -- Add findDeletedBookById(id)
-// TODO -- Add restoreDeletedBook(id)
+// Restore soft Deleted Book by id
+const restoreArchivedBookById = async (req, res) => {
+    const id = parseInt(req.params.id);
+    const book = await Book.findOne({wehere: {id: id}, paranoid : false});
+
+    if (!book || book.deletedAt === null) {
+        return res.status(404).json({msg: `No deleted book with ID ${id} found.`})
+    };
+
+    await book.restore();
+    res.status(200).json(book);
+};
 
 
 export {
@@ -87,5 +110,6 @@ export {
     getBookById,
     addBook,
     updateBook,
-    deleteBook
+    deleteBook,
+    restoreArchivedBookById,
 };
