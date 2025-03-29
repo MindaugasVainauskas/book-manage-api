@@ -53,7 +53,6 @@ const addBook = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const errorMessages = errors.array().map(err => `Error: ${err.path} - ${err.msg}`).join(', ');
-        logger.debug("Mapped errors: ", errorMessages);
         const error = new Error(errorMessages);
         error.status = 400;
         return next(error);
