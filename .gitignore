@@ -3,3 +3,6 @@ node_modules/
 
 # No env vars
 .env
+
+# No log files
+*.log
