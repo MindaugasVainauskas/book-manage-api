@@ -10,7 +10,6 @@ import {
 } from '../controllers/book.js';
 import { validateBookAdd, validateBookUpdate } from '../middleware/validators/index.js';
 
-
 // Get all books
 router.get('/', getBooks);
 
