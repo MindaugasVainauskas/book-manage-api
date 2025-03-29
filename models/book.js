@@ -10,8 +10,7 @@ const Book = db.define('book', {
     },
     title: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
     author: {
         type: DataTypes.STRING,

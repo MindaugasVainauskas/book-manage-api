@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import Book from "../models/book.js";
+import { validationResult } from "express-validator";
 
 // Get all books in DB with optional limit option
 const getBooks = async (req, res, next) => {
@@ -42,6 +43,11 @@ const getBookById = async (req, res, next) => {
 };
 
 const addBook = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json(errors);
+    };
+
     console.log(req.body);
     const newBook = req.body;
     if (!newBook.title || !newBook.author || !newBook.genre || !newBook.publishDate) {
@@ -68,10 +74,25 @@ const updateBook = async (req, res) => {
     if (!book) {
         return res.status(404).json({msg: `No book with ID ${id} found to update.`});
     };
+    
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json(errors);
+    };
 
     const updateData = req.body;
+    console.log("UPDATE_DATA: ", updateData);
 
-    await Book.update(updateData, { where: { id: id}});
+    // Converting publish date to DB friendly name if it exists.
+    if (updateData.publishDate) {
+        updateData.publish_date = updateData.publishDate;
+        delete updateData.publishDate;
+    };
+
+    console.log("DEBUG_UPDATE_DATA_QUERY: ", updateData);
+
+    const updatedBook = await Book.update(updateData, { where: { id: id}});
+    console.log("UPDATED_BOOK: ", updatedBook);
     const books = await Book.findAll();
 
     res.status(200).json(books);
