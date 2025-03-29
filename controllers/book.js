@@ -34,7 +34,7 @@ const getBookById = async (req, res, next) => {
         error.status = 404;
         return next(error);
     };
-    
+
     console.log("Get book with ID ", id);
     const book = await Book.findByPk(id);
 
@@ -76,6 +76,11 @@ const addBook = async (req, res, next) => {
 
 const updateBook = async (req, res, next) => {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        const error = new Error(`Invalid ID`);
+        error.status = 404;
+        return next(error);
+    };
     const book = await Book.findByPk(id);
 
     if (!book) {
@@ -109,6 +114,11 @@ const updateBook = async (req, res, next) => {
 // Soft deletes book entry from table
 const deleteBook = async (req, res, next) => {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        const error = new Error(`Invalid ID`);
+        error.status = 404;
+        return next(error);
+    };
     const book = await Book.findByPk(id);
 
     if (!book) {
@@ -125,6 +135,11 @@ const deleteBook = async (req, res, next) => {
 // Restore soft Deleted Book by id
 const restoreArchivedBookById = async (req, res) => {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        const error = new Error(`Invalid ID`);
+        error.status = 404;
+        return next(error);
+    };
     const book = await Book.findOne({wehere: {id: id}, paranoid : false});
 
     if (!book || book.deletedAt === null) {
