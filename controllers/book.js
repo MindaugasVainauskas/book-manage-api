@@ -5,7 +5,6 @@ import { validationResult } from "express-validator";
 // Get all books in DB with optional limit option
 const getBooks = async (req, res, next) => {
     console.log("Get all books");
-    console.log("REQ_QUERY: ", req.query);
     const {filter} = req.query;
     let dbQuery = {};
 
@@ -21,8 +20,7 @@ const getBooks = async (req, res, next) => {
         default:
             break;
     };
-        
-    console.log("QUERY_USED: ", dbQuery);
+
     const books = await Book.findAll(dbQuery);
 
     res.status(200).json(books);
@@ -31,21 +29,32 @@ const getBooks = async (req, res, next) => {
 
 const getBookById = async (req, res, next) => {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        const error = new Error(`Invalid ID`);
+        error.status = 404;
+        return next(error);
+    };
+    
     console.log("Get book with ID ", id);
     const book = await Book.findByPk(id);
 
     if (!book || typeof book === 'undefined') {
-        return res.status(404).send(`No book with ID ${id} found`);
+        const error = new Error(`No book with ID ${id} found`);
+        error.status = 404;
+        return next(error);
     };
 
     res.status(200).json(book);
-    next();
 };
 
 const addBook = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json(errors);
+        const errorMessages = errors.array().map(err => `Error: ${err.path} - ${err.msg}`).join(', ');
+        console.log("Mapped errors: ", errorMessages);
+        const error = new Error(errorMessages);
+        error.status = 400;
+        return next(error);
     };
 
     console.log(req.body);
@@ -65,21 +74,31 @@ const addBook = async (req, res, next) => {
     next();
 };
 
-const updateBook = async (req, res) => {
+const updateBook = async (req, res, next) => {
     const id = parseInt(req.params.id);
     const book = await Book.findByPk(id);
 
     if (!book) {
-        return res.status(404).json({msg: `No book with ID ${id} found to update.`});
+        const error = new Error(`No book with ID ${id} found to update.`);
+        error.status = 404;
+        return next(error);
     };
     
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json(errors);
+        const errorMessages = errors.array().map(err => `Error: ${err.path} - ${err.msg}`).join(', ');
+        const error = new Error(errorMessages);
+        error.status = 400;
+        return next(error);
     };
 
     const updateData = req.body;
     console.log("UPDATE_DATA: ", updateData);
+    if (Object.keys(updateData).length === 0) {
+        const error = new Error(`Must provide at least one field to update.`);
+        error.status = 400;
+        return next(error);
+    };
 
     await Book.update(updateData, { where: { id: id}});
     const books = await Book.findAll();
@@ -88,12 +107,14 @@ const updateBook = async (req, res) => {
 };
 
 // Soft deletes book entry from table
-const deleteBook = async (req, res) => {
+const deleteBook = async (req, res, next) => {
     const id = parseInt(req.params.id);
     const book = await Book.findByPk(id);
 
     if (!book) {
-        return res.status(404).json({msg: `No book with ID ${id} found to delete.`});
+        const error = new Error(`No book with ID ${id} found to delete.`);
+        error.status = 404;
+        return next(error);
     };
 
     await Book.destroy({ where: {id: id}});
@@ -107,9 +128,12 @@ const restoreArchivedBookById = async (req, res) => {
     const book = await Book.findOne({wehere: {id: id}, paranoid : false});
 
     if (!book || book.deletedAt === null) {
-        return res.status(404).json({msg: `No deleted book with ID ${id} found.`})
+        const error = new Error(`No deleted book with ID ${id} found.`);
+        error.status = 404;
+        return next(error);
     };
 
+    // Restore archived book by setting "deletedAt" flag to null
     await book.restore();
     res.status(200).json(book);
 };

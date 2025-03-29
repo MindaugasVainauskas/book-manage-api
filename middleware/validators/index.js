@@ -1,7 +1,7 @@
 import {
     newBookValidator,
     updateBookValidator,
-} from "./bookValidator.js";
+} from "./book.js";
 
 /**
  * Reasoning for this is that this way new validators can be added and only single import will be needed in importing file.
