@@ -5,7 +5,8 @@ import {
     getBookById,
     addBook,
     updateBook,
-    deleteBook
+    deleteBook,
+    restoreArchivedBookById
 } from '../controllers/book.js';
 
 
@@ -22,7 +23,9 @@ router.post('/', addBook);
 router.put('/:id', updateBook);
 
 // Delete book
-// Update book details
 router.delete('/:id', deleteBook);
+
+// Restore soft deleted book in DB
+router.put('/restore/:id', restoreArchivedBookById);
 
 export default router;
