@@ -136,14 +136,15 @@ const deleteBook = async (req, res, next) => {
 };
 
 // Restore soft Deleted Book by id
-const restoreArchivedBookById = async (req, res) => {
+const restoreArchivedBookById = async (req, res, next) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
         const error = new Error(`Invalid ID`);
         error.status = 404;
         return next(error);
     };
-    const book = await Book.findOne({wehere: {id: id}, paranoid : false});
+
+    const book = await Book.findOne({where: {id: id}, paranoid : false});
 
     if (!book || book.deletedAt === null) {
         const error = new Error(`No deleted book with ID ${id} found.`);
