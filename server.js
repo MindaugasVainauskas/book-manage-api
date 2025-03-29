@@ -1,11 +1,12 @@
 import express from 'express';
 import booksRouter from './routes/books.js';
 import db from './utils/database-config.js';
-import logger from './middleware/logger/index.js';
 import {
     errorHandler,
     pageNotFoundErrorhandler
 } from './middleware/errors/index.js';
+import { logger }from './middleware/logger/index.js';
+import { loggerMiddleware } from './middleware/logger/index.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -19,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 // Logger middleware
-app.use(logger);
+app.use(loggerMiddleware);
 
 // Routes middleware
 app.use('/api/books', booksRouter);
@@ -31,5 +32,5 @@ app.use(pageNotFoundErrorhandler);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-    console.log(`Express app listening on port ${PORT}`);
+    logger.info(`Express app listening on port ${PORT}`);
 });
