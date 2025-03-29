@@ -8,6 +8,7 @@ import {
     deleteBook,
     restoreArchivedBookById,
 } from '../controllers/book.js';
+import { validateBookAdd, validateBookUpdate } from '../middleware/validators/index.js';
 
 
 // Get all books
@@ -17,10 +18,10 @@ router.get('/', getBooks);
 router.get('/:id', getBookById);
 
 // Add new book
-router.post('/', addBook);
+router.post('/', validateBookAdd, addBook);
 
 // Update book details
-router.put('/:id', updateBook);
+router.put('/:id', validateBookUpdate, updateBook);
 
 // Delete book
 router.delete('/:id', deleteBook);

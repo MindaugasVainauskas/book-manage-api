@@ -11,7 +11,9 @@ const Book = db.define('book', {
     title: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: {
+            name: 'title-publish'
+        }
     },
     author: {
         type: DataTypes.STRING,
@@ -21,9 +23,13 @@ const Book = db.define('book', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    publish_date: {
+    publishDate: {
         type: DataTypes.DATEONLY,
-        allowNull: false
+        allowNull: false,
+        field: 'publish_date',
+        unique: {
+            name: 'title-publish'
+        }
     }
 },
 {
