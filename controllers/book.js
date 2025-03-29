@@ -50,15 +50,13 @@ const addBook = async (req, res, next) => {
 
     console.log(req.body);
     const newBook = req.body;
-    if (!newBook.title || !newBook.author || !newBook.genre || !newBook.publishDate) {
-        return res.status(400).json({msg: "Missing book details. Can't add new book."});
-    }
+
     console.log("New book data: ", newBook);
     const newBookInDb = await Book.create({
         title: newBook.title,
         author: newBook.author,
         genre: newBook.genre,
-        publish_date: newBook.publishDate
+        publishDate: newBook.publishDate
     });
     console.log(newBookInDb);
     const books = await Book.findAll();
@@ -83,16 +81,7 @@ const updateBook = async (req, res) => {
     const updateData = req.body;
     console.log("UPDATE_DATA: ", updateData);
 
-    // Converting publish date to DB friendly name if it exists.
-    if (updateData.publishDate) {
-        updateData.publish_date = updateData.publishDate;
-        delete updateData.publishDate;
-    };
-
-    console.log("DEBUG_UPDATE_DATA_QUERY: ", updateData);
-
-    const updatedBook = await Book.update(updateData, { where: { id: id}});
-    console.log("UPDATED_BOOK: ", updatedBook);
+    await Book.update(updateData, { where: { id: id}});
     const books = await Book.findAll();
 
     res.status(200).json(books);
