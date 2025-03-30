@@ -8,15 +8,18 @@ const getBooks = async (req, res, next) => {
     logger.debug("Get all books");
     const {filter} = req.query;
     let dbQuery = {};
+    let logMessage = 'available ';
 
     // Change filtered query according to book active state if user wants so.
     // Default is active books only.
     switch (filter) {
         case 'archived':
             dbQuery = {where: {deletedAt: {[Op.not]: null}}, paranoid: false};
+            logMessage = filter + ' ';
             break;
         case 'all':
             dbQuery = {paranoid: false};
+            logMessage = filter + ' ';
             break;
         default:
             break;
@@ -24,7 +27,7 @@ const getBooks = async (req, res, next) => {
 
     const books = await Book.findAll(dbQuery);
 
-    logger.info("Retrieved all available books.");
+    logger.info(`Retrieved ${logMessage}books.`);
     res.status(200).json(books);
 };
 
