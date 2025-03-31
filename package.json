@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "dev": "node --watch --env-file=.env ./src/server.js",
-    "start": "node --env-file=.env ./src/server.js"
+    "start": "node --env-file=.env ./src/server.js",
+    "build": "npm install && npm start"
   },
   "keywords": [],
   "author": "",
