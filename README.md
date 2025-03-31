@@ -22,7 +22,7 @@ This is a simple REST API for managing books library written in NodeJS using Exp
 
 ### Running project ###
 1. Run "docker compose up -d" command to create Docker network and start MySQL container which will have connection details provided in "docker-compose.yml". "-d" flag is optional as it just runs container in the background. You can check that your MySQL service is running using "docker compose ps" command if wanted.
-2. Open new terminal (if needed) and run command "npm run build". This will run npm install and npm run start commands which will start the application.
+2. Open new terminal (if needed) and run command "npm run build". This will install all needed node dependencies and start the application.
 3. Open your API testing platform. All API commands will start with "localhost:3000/api/books" when testing.
 
 #### URL call list ####
