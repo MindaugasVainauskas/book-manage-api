@@ -111,9 +111,9 @@ const updateBook = async (req, res, next) => {
     };
 
     await Book.update(updateData, { where: { id: id}});
-    const books = await Book.findAll();
+    const updatedBook = await Book.findByPk(id);
     logger.info(`Successfully updated book with ID ${id}`);
-    res.status(200).json(books);
+    res.status(200).json(updatedBook);
 };
 
 // Soft deletes book entry from table
@@ -143,7 +143,7 @@ const restoreArchivedBookById = async (req, res, next) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
         const error = new Error(`Invalid ID`);
-        error.status = 404;
+        error.status = 400;
         return next(error);
     };
 
@@ -156,9 +156,16 @@ const restoreArchivedBookById = async (req, res, next) => {
     };
 
     // Restore archived book by setting "deletedAt" flag to null
-    await book.restore();
+    await Book.restore({where: {id: id}});
+    const restoredBook = await Book.findOne({where: {id: id}});
+    if (!restoredBook || restoredBook.deletedAt) {
+        const error = new Error(`Failed to restore book with ID ${id}`);
+        error.status = 400;
+        return next(error);
+    };
+    
     logger.info(`Successfully restored book with ID ${id}`);
-    res.status(200).json(book);
+    res.status(200).json(restoredBook);
 };
 
 
