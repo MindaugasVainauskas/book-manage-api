@@ -8,15 +8,18 @@ const getBooks = async (req, res, next) => {
     logger.debug("Get all books");
     const {filter} = req.query;
     let dbQuery = {};
+    let logMessage = 'available ';
 
     // Change filtered query according to book active state if user wants so.
     // Default is active books only.
     switch (filter) {
         case 'archived':
             dbQuery = {where: {deletedAt: {[Op.not]: null}}, paranoid: false};
+            logMessage = filter + ' ';
             break;
         case 'all':
             dbQuery = {paranoid: false};
+            logMessage = filter + ' ';
             break;
         default:
             break;
@@ -24,7 +27,7 @@ const getBooks = async (req, res, next) => {
 
     const books = await Book.findAll(dbQuery);
 
-    logger.info("Retrieved all available books.");
+    logger.info(`Retrieved ${logMessage}books.`);
     res.status(200).json(books);
 };
 
@@ -108,9 +111,9 @@ const updateBook = async (req, res, next) => {
     };
 
     await Book.update(updateData, { where: { id: id}});
-    const books = await Book.findAll();
+    const updatedBook = await Book.findByPk(id);
     logger.info(`Successfully updated book with ID ${id}`);
-    res.status(200).json(books);
+    res.status(200).json(updatedBook);
 };
 
 // Soft deletes book entry from table
@@ -136,14 +139,15 @@ const deleteBook = async (req, res, next) => {
 };
 
 // Restore soft Deleted Book by id
-const restoreArchivedBookById = async (req, res) => {
+const restoreArchivedBookById = async (req, res, next) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
         const error = new Error(`Invalid ID`);
-        error.status = 404;
+        error.status = 400;
         return next(error);
     };
-    const book = await Book.findOne({wehere: {id: id}, paranoid : false});
+
+    const book = await Book.findOne({where: {id: id}, paranoid : false});
 
     if (!book || book.deletedAt === null) {
         const error = new Error(`No deleted book with ID ${id} found.`);
@@ -152,9 +156,16 @@ const restoreArchivedBookById = async (req, res) => {
     };
 
     // Restore archived book by setting "deletedAt" flag to null
-    await book.restore();
+    await Book.restore({where: {id: id}});
+    const restoredBook = await Book.findOne({where: {id: id}});
+    if (!restoredBook || restoredBook.deletedAt) {
+        const error = new Error(`Failed to restore book with ID ${id}`);
+        error.status = 400;
+        return next(error);
+    };
+    
     logger.info(`Successfully restored book with ID ${id}`);
-    res.status(200).json(book);
+    res.status(200).json(restoredBook);
 };
 
 
