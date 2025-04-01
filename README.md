@@ -3,8 +3,9 @@
 This is a simple REST API for managing books library written in NodeJS using Express and Dockerized MySQL database for storage.
 
 ### Pre-requisites ###
-1. Docker or Docker Desktop. Download link in installation instructions if needed.
-2. API testing platform. Can use Postman if standalone tool is wanted (available here: https://www.postman.com/), or use Thunderclient extension in VSC, if it is your preferred code editor.
+1. Node v22.14 or newer.
+2. Docker or Docker Desktop. Download link in installation instructions if needed.
+3. API testing platform. Can use Postman if standalone tool is wanted (available here: https://www.postman.com/), or use Thunderclient extension in VSC, if it is your preferred code editor.
 
 ### Installation ###
 #### Docker installation (if needed) ####
