@@ -8,6 +8,8 @@ This is a simple REST API for managing books library written in NodeJS using Exp
 3. API testing platform. Can use Postman if standalone tool is wanted (available here: https://www.postman.com/), or use Thunderclient extension in VSC, if it is your preferred code editor.
 
 ### Installation ###
+#### Node installation ####
+1. Download Node following instructions available here https://nodejs.org/en/download. Make sure to select your platform accordingly and install manager according to your preference. Download options available at top of the download page as selectable options.
 #### Docker installation (if needed) ####
 1. Download project from repository.
 2. Download Docker if not present in machine. Docker desktop download link is available here: https://www.docker.com/
