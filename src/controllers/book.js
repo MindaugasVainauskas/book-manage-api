@@ -25,10 +25,17 @@ const getBooks = async (req, res, next) => {
             break;
     };
 
-    const books = await Book.findAll(dbQuery);
-
-    logger.info(`Retrieved ${logMessage}books.`);
-    res.status(200).json(books);
+    try {
+        const books = await Book.findAll(dbQuery);
+    
+        logger.info(`Retrieved ${logMessage}books.`);
+        res.status(200).json(books);        
+    } catch (error) {
+        const errMessage = error.message || error.messages || "Error during books list retrieval";
+        const err = new Error(errMessage);
+        err.status = 404;
+        return next(err);
+    }
 };
 
 const getBookById = async (req, res, next) => {
@@ -65,13 +72,21 @@ const addBook = async (req, res, next) => {
     const newBook = req.body;
 
     logger.debug("New book data: ", newBook);
-    const newBookInDb = await Book.create({
-        title: newBook.title,
-        author: newBook.author,
-        genre: newBook.genre,
-        publishDate: newBook.publishDate
-    });
-    logger.debug(newBookInDb);
+    try {
+        const newBookInDb = await Book.create({
+            title: newBook.title,
+            author: newBook.author,
+            genre: newBook.genre,
+            publishDate: newBook.publishDate
+        });
+        logger.debug(newBookInDb);
+    } catch (error) {
+        const errorMessage = error.message || error.messages || "Error during book creation";
+        const err = new Error(errorMessage);
+        err.status = 400;
+        return next(err);
+    };
+    
     const books = await Book.findAll();
     logger.info(`Successfully added new book to library.`);
     res.status(201).json(books);
@@ -110,7 +125,18 @@ const updateBook = async (req, res, next) => {
         return next(error);
     };
 
-    await Book.update(updateData, { where: { id: id}});
+    try {
+        await Book.update(updateData, { where: { id: id}});
+    } catch (error) {
+        logger.info(error);
+        // Express validator passes errors from DB update attempt
+        const validationErrorMessage = error.errors.map(err => `Error: ${err.message}; Type: ${err.type}; Value: ${err.value}`).join(', ');
+        logger.info(validationErrorMessage); 
+        const handleError = new Error("Error during book update: " + validationErrorMessage);
+        handleError.status = 400;
+        return next(handleError);
+    };
+
     const updatedBook = await Book.findByPk(id);
     logger.info(`Successfully updated book with ID ${id}`);
     res.status(200).json(updatedBook);
@@ -132,7 +158,15 @@ const deleteBook = async (req, res, next) => {
         return next(error);
     };
 
-    await Book.destroy({ where: {id: id}});
+    try {
+        await Book.destroy({ where: {id: id}});        
+    } catch (error) {
+        const errMessage = error.message || error.messages || "Error during book archive attempt."
+        const err = new Error(errMessage);
+        err.status = 404;
+        return next(err);
+    };
+
     const books = await Book.findAll();
     logger.info(`Successfully archived book with ID ${id}`);
     res.status(200).json(books);
@@ -155,8 +189,16 @@ const restoreArchivedBookById = async (req, res, next) => {
         return next(error);
     };
 
-    // Restore archived book by setting "deletedAt" flag to null
-    await Book.restore({where: {id: id}});
+    try {
+        // Restore archived book by setting "deletedAt" flag to null
+        await Book.restore({where: {id: id}});        
+    } catch (error) {
+        const errMessage = error.message || error.messages || "Error during book restoration attempt."
+        const err = new Error(errMessage);
+        err.status = 404;
+        return next(err);
+    };
+
     const restoredBook = await Book.findOne({where: {id: id}});
     if (!restoredBook || restoredBook.deletedAt) {
         const error = new Error(`Failed to restore book with ID ${id}`);
